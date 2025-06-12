@@ -15,6 +15,7 @@ import {
   MARKETPLACE_ADDRESS,
   BRAP_TOKEN_ADDRESS,
 } from "@/const/contracts";
+import Image from "next/image";
 
 // Helper to resolve IPFS images
 function resolveImageUrl(url?: string) {
@@ -48,40 +49,37 @@ function useBrapPrice() {
   return price;
 }
 
-export default function SellPage() {
-  const account = useActiveAccount();
-  const brapPrice = useBrapPrice();
-  const [prices, setPrices] = useState<{
-    [key: string]: string;
-  }>({});
-  const [listingStatus, setListingStatus] = useState<{
-    [key: string]: string;
-  }>({});
-
-  // Fetch NFTs from all collections owned by the user
-  const nftResults = NFT_COLLECTIONS.map((address) => {
-    const contract = getContract({
-      client,
-      chain: avalanche,
-      address,
-    });
-    return useReadContract(getOwnedNFTs, {
-      contract,
-      owner: account?.address || "",
-    });
+// Subcomponent for each collection
+function CollectionNFTs({
+  contractAddress,
+  account,
+  prices,
+  setPrices,
+  listingStatus,
+  setListingStatus,
+}: {
+  contractAddress: string;
+  account: { address: string } | null;
+  prices: { [key: string]: string };
+  setPrices: React.Dispatch<
+    React.SetStateAction<{ [key: string]: string }>
+  >;
+  listingStatus: { [key: string]: string };
+  setListingStatus: React.Dispatch<
+    React.SetStateAction<{ [key: string]: string }>
+  >;
+}) {
+  // All hooks are at the top level
+  const contract = getContract({
+    client,
+    chain: avalanche,
+    address: contractAddress,
   });
 
-  // Flatten all NFTs into a single array
-  const nfts = nftResults
-    .map((result, i) =>
-      result.data
-        ? result.data.map((nft: any) => ({
-            ...nft,
-            contractAddress: NFT_COLLECTIONS[i],
-          }))
-        : [],
-    )
-    .flat();
+  const { data: nfts } = useReadContract(getOwnedNFTs, {
+    contract,
+    owner: account?.address || "",
+  });
 
   // Handle price input change
   function handlePriceChange(
@@ -141,6 +139,74 @@ export default function SellPage() {
     }
   }
 
+  if (!nfts || nfts.length === 0) return null;
+
+  return (
+    <>
+      {nfts.map((nft: any) => (
+        <div
+          key={`${contractAddress}-${nft.id.toString()}`}
+          className="border rounded-lg p-4 bg-white shadow"
+        >
+          <Image
+            src={resolveImageUrl(nft.metadata?.image)}
+            alt={nft.metadata?.name || "NFT"}
+            width={400}
+            height={400}
+            className="w-full h-64 object-cover rounded"
+          />
+          <h2 className="text-xl font-bold mt-2 text-black">
+            {nft.metadata?.name || "Untitled NFT"}
+          </h2>
+          <p className="text-black">
+            {nft.metadata?.description || ""}
+          </p>
+          <input
+            type="number"
+            min="0"
+            step="any"
+            placeholder="Price in BRAP"
+            className="mt-4 w-full p-2 border rounded text-black"
+            value={prices[nft.id.toString()] || ""}
+            onChange={(e) =>
+              handlePriceChange(
+                nft.id.toString(),
+                e.target.value,
+              )
+            }
+          />
+          <button
+            className="mt-4 w-full py-3 rounded-lg font-bold text-black bg-gradient-to-r from-yellow-300 to-orange-400 hover:from-yellow-400 hover:to-orange-500 transition"
+            onClick={() =>
+              handleSell({ ...nft, contractAddress })
+            }
+            disabled={
+              listingStatus[nft.id.toString()] === "listing"
+            }
+          >
+            {listingStatus[nft.id.toString()] === "listing"
+              ? "Listing..."
+              : listingStatus[nft.id.toString()] ===
+                  "success"
+                ? "Listed!"
+                : "Sell"}
+          </button>
+        </div>
+      ))}
+    </>
+  );
+}
+
+export default function SellPage() {
+  const account = useActiveAccount();
+  const brapPrice = useBrapPrice();
+  const [prices, setPrices] = useState<{
+    [key: string]: string;
+  }>({});
+  const [listingStatus, setListingStatus] = useState<{
+    [key: string]: string;
+  }>({});
+
   return (
     <main className="p-6">
       <h1 className="text-3xl font-bold mb-2 text-black">
@@ -160,66 +226,25 @@ export default function SellPage() {
             {account.address}
           </div>
         ) : (
-          <div>
-            Connect your wallet Jeeter!.
-          </div>
+          <div>Connect your wallet Jeeter!.</div>
         )}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {nfts && nfts.length > 0 ? (
-          nfts.map((nft: any) => (
-            <div
-              key={`${nft.contractAddress}-${nft.id.toString()}`}
-              className="border rounded-lg p-4 bg-white shadow"
-            >
-              <img
-                src={resolveImageUrl(nft.metadata?.image)}
-                alt={nft.metadata?.name || "NFT"}
-                className="w-full h-64 object-cover rounded"
-              />
-              <h2 className="text-xl font-bold mt-2 text-black">
-                {nft.metadata?.name || "Untitled NFT"}
-              </h2>
-              <p className="text-black">
-                {nft.metadata?.description || ""}
-              </p>
-              <input
-                type="number"
-                min="0"
-                step="any"
-                placeholder="Price in BRAP"
-                className="mt-4 w-full p-2 border rounded text-black"
-                value={prices[nft.id.toString()] || ""}
-                onChange={(e) =>
-                  handlePriceChange(
-                    nft.id.toString(),
-                    e.target.value,
-                  )
-                }
-              />
-              <button
-                className="mt-4 w-full py-3 rounded-lg font-bold text-black bg-gradient-to-r from-yellow-300 to-orange-400 hover:from-yellow-400 hover:to-orange-500 transition"
-                onClick={() => handleSell(nft)}
-                disabled={
-                  listingStatus[nft.id.toString()] ===
-                  "listing"
-                }
-              >
-                {listingStatus[nft.id.toString()] ===
-                "listing"
-                  ? "Listing..."
-                  : listingStatus[nft.id.toString()] ===
-                      "success"
-                    ? "Listed!"
-                    : "Sell"}
-              </button>
-            </div>
+        {account ? (
+          NFT_COLLECTIONS.map((address: string) => (
+            <CollectionNFTs
+              key={address}
+              contractAddress={address}
+              account={account}
+              prices={prices}
+              setPrices={setPrices}
+              listingStatus={listingStatus}
+              setListingStatus={setListingStatus}
+            />
           ))
         ) : (
           <div className="text-black col-span-3">
-            {account
-              ? "You don't own any NFTs from these collections."
-              : "Connect your wallet to see your NFTs."}
+            Connect your wallet to see your NFTs.
           </div>
         )}
       </div>

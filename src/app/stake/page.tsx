@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   useActiveAccount,
   useSendTransaction,
@@ -32,7 +33,7 @@ const STAKING_PAIRS = [
     label: "Degen Bee Nectar",
     collectionName: "Bad Azz Bumba Beez",
     collectionAddress:
-      "0x0924319a7524cf023356Ace4D5018fADDE0c60C8", // <-- corrected
+      "0x0924319a7524cf023356Ace4D5018fADDE0c60C8",
     stakingAddress:
       "0x6b391d65f21CA93A39E3B9715C55b320f580aD1a",
   },
@@ -212,7 +213,7 @@ export default function StakePage() {
     return () => {
       cancelled = true;
     };
-  }, [account?.address, actionStatus]);
+  }, [account, actionStatus]); // <-- FIXED: added 'account' to dependencies
 
   // Staking/unstaking functions using prepareContractCall
   const handleStake = async (
@@ -409,8 +410,8 @@ export default function StakePage() {
                 {unstakedNFTs.length === 0 &&
                   stakedNFTs.length === 0 && (
                     <div className="text-black col-span-3">
-                      You don't own or have staked any NFTs
-                      from this collection.
+                      You don&apos;t own or have staked any
+                      NFTs from this collection.
                     </div>
                   )}
                 {unstakedNFTs.map((nft: any) => (
@@ -418,12 +419,15 @@ export default function StakePage() {
                     key={`unstaked-${nft.contractAddress}-${nft.id.toString()}-${pair.stakingAddress}`}
                     className="border rounded-lg p-4 bg-white shadow border"
                   >
-                    <img
+                    <Image
                       src={resolveImageUrl(
                         nft.metadata?.image,
                       )}
                       alt={nft.metadata?.name || "NFT"}
+                      width={400}
+                      height={400}
                       className="w-full h-64 object-cover rounded"
+                      unoptimized
                     />
                     <h2 className="text-xl font-bold mt-2 text-black">
                       {nft.metadata?.name || "Untitled NFT"}
@@ -466,12 +470,15 @@ export default function StakePage() {
                     key={`staked-${nft.contractAddress}-${nft.id.toString()}-${pair.stakingAddress}`}
                     className="border rounded-lg p-4 bg-white shadow border-4 border-yellow-400"
                   >
-                    <img
+                    <Image
                       src={resolveImageUrl(
                         nft.metadata?.image,
                       )}
                       alt={nft.metadata?.name || "NFT"}
+                      width={400}
+                      height={400}
                       className="w-full h-64 object-cover rounded"
+                      unoptimized
                     />
                     <h2 className="text-xl font-bold mt-2 text-black">
                       {nft.metadata?.name || "Untitled NFT"}
