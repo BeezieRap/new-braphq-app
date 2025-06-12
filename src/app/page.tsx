@@ -1,100 +1,94 @@
 "use client";
 
 import Image from "next/image";
-import { ConnectButton } from "thirdweb/react";
-import thirdwebIcon from "@public/thirdweb.svg";
-import { client } from "./client";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="p-4 pb-10 min-h-[100vh] flex items-center justify-center container max-w-screen-lg mx-auto">
-      <div className="py-20">
-        <Header />
-
-        <div className="flex justify-center mb-20">
-          <ConnectButton
-            client={client}
-            appMetadata={{
-              name: "Example App",
-              url: "https://example.com",
-            }}
-          />
-        </div>
-
-        <ThirdwebResources />
+    <div className="bg-white min-h-screen text-black">
+      <div className="flex justify-center p-2">
+        <Image
+          src="/brap-hq-logo.png"
+          width={860}
+          height={540}
+          alt="brap hq logo, NFT marketplace"
+          quality={100}
+          className="max-w-screen mb-2"
+          priority
+        />
       </div>
-    </main>
-  );
-}
 
-function Header() {
-  return (
-    <header className="flex flex-col items-center mb-20 md:mb-20">
-      <Image
-        src={thirdwebIcon}
-        alt=""
-        className="size-[150px] md:size-[150px]"
-        style={{
-          filter: "drop-shadow(0px 0px 24px #a726a9a8)",
-        }}
-      />
+      <div className="px-8 mx-auto text-center">
+        <h1 className="mb-4 font-bold text-6xl">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
+            MINT | STAKE | EARN 🐝💨
+          </span>
+          <br />
+          Join the swarm!
+        </h1>
 
-      <h1 className="text-2xl md:text-6xl font-semibold md:font-bold tracking-tighter mb-6 text-zinc-100">
-        thirdweb SDK
-        <span className="text-zinc-300 inline-block mx-1"> + </span>
-        <span className="inline-block -skew-x-6 text-blue-500"> Next.js </span>
-      </h1>
+        <p className="text-gray-800 text-lg max-w-2xl mx-auto mb-4">
+          <strong>BRAP HQ</strong> — the official home of
+          the swarm and the BRAP ecosystem. Built on
+          Avalanche, this is where music, culture, and
+          crypto collide. Discover our exclusive one-of-one{" "}
+          <strong className="text-yellow-800">
+            Bumba Beez
+          </strong>{" "}
+          NFT collections. Stake NFTs to earn monthly
+          $BRAPTKN rewards through our unique nectar tiering
+          system. From the bold{" "}
+          <em className="text-orange-700">
+            Bad Azz Bumba Beez
+          </em>{" "}
+          to the super fly{" "}
+          <em className="text-orange-600">
+            Betaverse Beez
+          </em>
+          , each collection earns a different amount of
+          monthly $BRAPTKN to keep our community
+          replenished. Dive into the marketplace to collect
+          your Bumba Bee or a fire Track. Stake to grow your
+          nectar. You can buy or swap BRAP on Trader Joe.
+          Whether you are here to collect, earn, or vibe —
+          BRAP HQ is your buzzing headquarters. 🐝💨
+        </p>
 
-      <p className="text-zinc-300 text-base">
-        Read the{" "}
-        <code className="bg-zinc-800 text-zinc-300 px-2 rounded py-1 text-sm mx-1">
-          README.md
-        </code>{" "}
-        file to get started.
-      </p>
-    </header>
-  );
-}
-
-function ThirdwebResources() {
-  return (
-    <div className="grid gap-4 lg:grid-cols-3 justify-center">
-      <ArticleCard
-        title="thirdweb SDK Docs"
-        href="https://portal.thirdweb.com/typescript/v5"
-        description="thirdweb TypeScript SDK documentation"
-      />
-
-      <ArticleCard
-        title="Components and Hooks"
-        href="https://portal.thirdweb.com/typescript/v5/react"
-        description="Learn about the thirdweb React components and hooks in thirdweb SDK"
-      />
-
-      <ArticleCard
-        title="thirdweb Dashboard"
-        href="https://thirdweb.com/dashboard"
-        description="Deploy, configure, and manage your smart contracts from the dashboard."
-      />
+        <div className="flex flex-wrap justify-center text-lg font-medium items-center mt-10 gap-4">
+          <Link
+            className="w-56 p-3 rounded-lg transition-all hover:shadow-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-black border border-yellow-500 text-center"
+            href="https://x.com/BrumBeezieRap"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Follow BRAP on X
+          </Link>
+          <Link
+            className="w-56 p-3 rounded-lg transition-all hover:shadow-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-black border border-yellow-500 text-center"
+            href="https://arena.social/?ref=BrumBeezieRap"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Swarm on Arena
+          </Link>
+          <Link
+            className="w-56 p-3 rounded-lg transition-all hover:shadow-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-black border border-yellow-500 text-center"
+            href="https://thirdweb.com/avalanche/0x5b3Ff4d494E9Ee69eE0f52Ab9656cFfe99D4839E"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            BUY $BRAPTKN
+          </Link>
+          <Link
+            className="w-56 p-3 rounded-lg transition-all hover:shadow-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-black border border-yellow-500 text-center"
+            href="https://discord.gg/TYbfbt2R"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Swarm Discord
+          </Link>
+        </div>
+      </div>
     </div>
-  );
-}
-
-function ArticleCard(props: {
-  title: string;
-  href: string;
-  description: string;
-}) {
-  return (
-    <a
-      href={props.href + "?utm_source=next-template"}
-      target="_blank"
-      className="flex flex-col border border-zinc-800 p-4 rounded-lg hover:bg-zinc-900 transition-colors hover:border-zinc-700"
-    >
-      <article>
-        <h2 className="text-lg font-semibold mb-2">{props.title}</h2>
-        <p className="text-sm text-zinc-400">{props.description}</p>
-      </article>
-    </a>
   );
 }
