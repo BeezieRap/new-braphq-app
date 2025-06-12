@@ -67,7 +67,10 @@ export default function BuyPage() {
         setErrorMsg(null);
         refetch();
       } catch (err: any) {
-        setErrorMsg(err.message || "Transaction failed.");
+        setErrorMsg(
+          err.message ||
+            "Transaction failed. You may not have enough AVAX to complete this purchase.",
+        );
       } finally {
         setPendingId(null);
       }
@@ -90,51 +93,71 @@ export default function BuyPage() {
         Buy Bumba Beez!
       </h1>
       {errorMsg && (
-        <div className="mb-4 p-3 bg-yellow-100 text-yellow-800 rounded">
+        <div className="mb-4 p-3 bg-red-100 text-red-800 rounded">
           {errorMsg}
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {listings && listings.length > 0 ? (
-          listings.map((listing: any) => (
-            <div
-              key={listing.id}
-              className="border rounded-lg p-4 bg-white shadow"
-            >
-              <img
-                src={resolveImageUrl(
-                  listing.asset?.metadata?.image,
-                )}
-                alt={listing.asset?.metadata?.name || "NFT"}
-                className="w-full h-64 object-cover rounded"
-              />
-              <h2 className="text-xl font-bold mt-2 text-black">
-                {listing.asset?.metadata?.name ||
-                  "Untitled NFT"}
-              </h2>
-              <p className="text-black">
-                {listing.asset?.metadata?.description || ""}
-              </p>
-              <button
-                className="mt-6 w-full py-3 rounded-lg font-bold text-black bg-gradient-to-r from-yellow-300 to-orange-400 hover:from-yellow-400 hover:to-orange-500 transition"
-                onClick={() => handleBuy(listing)}
-                disabled={pendingId === listing.id}
+          listings.map((listing: any) => {
+            // Only show buy button if the listing has a price
+            const hasPrice =
+              listing.currencyValuePerToken &&
+              listing.currencyValuePerToken.displayValue &&
+              listing.currencyValuePerToken.symbol;
+
+            return (
+              <div
+                key={listing.id}
+                className="border rounded-lg p-4 bg-white shadow"
               >
-                {pendingId === listing.id ? (
-                  "Processing..."
+                <img
+                  src={resolveImageUrl(
+                    listing.asset?.metadata?.image,
+                  )}
+                  alt={
+                    listing.asset?.metadata?.name || "NFT"
+                  }
+                  className="w-full h-64 object-cover rounded"
+                />
+                <h2 className="text-xl font-bold mt-2 text-black">
+                  {listing.asset?.metadata?.name ||
+                    "Untitled NFT"}
+                </h2>
+                <p className="text-black">
+                  {listing.asset?.metadata?.description ||
+                    ""}
+                </p>
+                {hasPrice ? (
+                  <button
+                    className="mt-6 w-full py-3 rounded-lg font-bold text-black bg-gradient-to-r from-yellow-300 to-orange-400 hover:from-yellow-400 hover:to-orange-500 transition"
+                    onClick={() => handleBuy(listing)}
+                    disabled={pendingId === listing.id}
+                  >
+                    {pendingId === listing.id ? (
+                      "Processing..."
+                    ) : (
+                      <>
+                        Buy for{" "}
+                        {
+                          listing.currencyValuePerToken
+                            .displayValue
+                        }{" "}
+                        {
+                          listing.currencyValuePerToken
+                            .symbol
+                        }
+                      </>
+                    )}
+                  </button>
                 ) : (
-                  <>
-                    Buy for{" "}
-                    {
-                      listing.currencyValuePerToken
-                        ?.displayValue
-                    }{" "}
-                    {listing.currencyValuePerToken?.symbol}
-                  </>
+                  <div className="mt-6 text-gray-500 font-semibold">
+                    Not for sale
+                  </div>
                 )}
-              </button>
-            </div>
-          ))
+              </div>
+            );
+          })
         ) : (
           <div className="text-black">
             Oops all our Bumba Beez are sold out!
