@@ -19,6 +19,7 @@ import {
 import { avalanche } from "thirdweb/chains";
 import { client } from "@/app/client";
 import { BRAP_TOKEN_ADDRESS } from "@/const/contracts";
+import { resolveIPFSUrl } from "@/utils/ipfs";
 
 const STAKING_PAIRS = [
   {
@@ -47,15 +48,6 @@ const STAKING_PAIRS = [
   },
 ];
 
-function resolveImageUrl(url?: string) {
-  if (!url) return "/placeholder.png";
-  if (url.startsWith("ipfs://")) {
-    return url.replace("ipfs://", "https://ipfs.io/ipfs/");
-  }
-  return url;
-}
-
-// Helper to format rewards as xx.xx
 function formatTokenAmount(
   amount: string,
   decimals: number = 18,
@@ -74,7 +66,6 @@ function formatTokenAmount(
 export default function StakePage() {
   const account = useActiveAccount();
 
-  // Fetch BRAP token balance
   const { data: brapBalance } = useWalletBalance({
     address: account?.address,
     chain: avalanche,
@@ -87,7 +78,6 @@ export default function StakePage() {
   }>({});
   const { mutate: sendTx } = useSendTransaction();
 
-  // State for each collection
   const [stakeInfos, setStakeInfos] = useState<any[]>([]);
   const [
     stakedNFTsByCollection,
@@ -116,7 +106,6 @@ export default function StakePage() {
       const allUnstakedNFTs: any[][] = [];
 
       for (const pair of STAKING_PAIRS) {
-        // Contracts
         const nftContract = getContract({
           client,
           chain: avalanche,
@@ -128,7 +117,6 @@ export default function StakePage() {
           address: pair.stakingAddress,
         });
 
-        // 1. Unstaked NFTs (all owned by user)
         let ownedNFTs: any[] = [];
         try {
           ownedNFTs =
@@ -140,7 +128,6 @@ export default function StakePage() {
           ownedNFTs = [];
         }
 
-        // 2. Staked NFTs (token IDs)
         let stakeInfo: any = {
           tokensStaked: [],
           rewards: "0",
@@ -163,7 +150,6 @@ export default function StakePage() {
         }
         allStakeInfos.push(stakeInfo);
 
-        // 3. Fetch staked NFT metadata
         let stakedNFTs: any[] = [];
         if (stakeInfo.tokensStaked.length > 0) {
           stakedNFTs = await Promise.all(
@@ -187,7 +173,6 @@ export default function StakePage() {
         }
         stakedNFTs = stakedNFTs.filter(Boolean);
 
-        // 4. Filter out staked NFTs from ownedNFTs
         const stakedIds = new Set(stakeInfo.tokensStaked);
         const unstakedNFTs = ownedNFTs
           .filter(
@@ -213,9 +198,8 @@ export default function StakePage() {
     return () => {
       cancelled = true;
     };
-  }, [account, actionStatus]); // <-- FIXED: added 'account' to dependencies
+  }, [account, actionStatus]);
 
-  // Staking/unstaking functions using prepareContractCall
   const handleStake = async (
     stakingAddress: string,
     nft: any,
@@ -366,7 +350,6 @@ export default function StakePage() {
           const stakedNFTs =
             stakedNFTsByCollection[idx] || [];
 
-          // Always render the section if the user owns or has staked NFTs from this collection
           return (
             <div
               key={pair.stakingAddress}
@@ -406,7 +389,6 @@ export default function StakePage() {
                   : `Claim ${formatTokenAmount(stakeInfo?.rewards || "0")} $BRAPTKNs`}
               </button>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Unstaked NFTs */}
                 {unstakedNFTs.length === 0 &&
                   stakedNFTs.length === 0 && (
                     <div className="text-black col-span-3">
@@ -420,7 +402,7 @@ export default function StakePage() {
                     className="border rounded-lg p-4 bg-white shadow border"
                   >
                     <Image
-                      src={resolveImageUrl(
+                      src={resolveIPFSUrl(
                         nft.metadata?.image,
                       )}
                       alt={nft.metadata?.name || "NFT"}
@@ -464,14 +446,13 @@ export default function StakePage() {
                     </div>
                   </div>
                 ))}
-                {/* Staked NFTs */}
                 {stakedNFTs.map((nft: any) => (
                   <div
                     key={`staked-${nft.contractAddress}-${nft.id.toString()}-${pair.stakingAddress}`}
                     className="border rounded-lg p-4 bg-white shadow border-4 border-yellow-400"
                   >
                     <Image
-                      src={resolveImageUrl(
+                      src={resolveIPFSUrl(
                         nft.metadata?.image,
                       )}
                       alt={nft.metadata?.name || "NFT"}

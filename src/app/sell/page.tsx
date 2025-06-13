@@ -16,17 +16,8 @@ import {
   BRAP_TOKEN_ADDRESS,
 } from "@/const/contracts";
 import Image from "next/image";
+import { resolveIPFSUrl } from "@/utils/ipfs";
 
-// Helper to resolve IPFS images
-function resolveImageUrl(url?: string) {
-  if (!url) return "/placeholder.png";
-  if (url.startsWith("ipfs://")) {
-    return url.replace("ipfs://", "https://ipfs.io/ipfs/");
-  }
-  return url;
-}
-
-// Dexscreener hook for BRAPTKN/AVAX price
 const DEXSCREENER_API =
   "https://api.dexscreener.com/latest/dex/pairs/avalanche/0x5b3ff4d494e9ee69ee0f52ab9656cffe99d4839e";
 
@@ -49,7 +40,6 @@ function useBrapPrice() {
   return price;
 }
 
-// Subcomponent for each collection
 function CollectionNFTs({
   contractAddress,
   account,
@@ -69,7 +59,6 @@ function CollectionNFTs({
     React.SetStateAction<{ [key: string]: string }>
   >;
 }) {
-  // All hooks are at the top level
   const contract = getContract({
     client,
     chain: avalanche,
@@ -81,7 +70,6 @@ function CollectionNFTs({
     owner: account?.address || "",
   });
 
-  // Handle price input change
   function handlePriceChange(
     tokenId: string,
     value: string,
@@ -89,7 +77,6 @@ function CollectionNFTs({
     setPrices((prev) => ({ ...prev, [tokenId]: value }));
   }
 
-  // Handle sell/listing
   async function handleSell(nft: any) {
     if (!account)
       return alert("Connect your wallet first!");
@@ -112,7 +99,6 @@ function CollectionNFTs({
         chain: avalanche,
         address: MARKETPLACE_ADDRESS,
       });
-      // Create a direct listing
       await createListing({
         contract: marketplace,
         assetContractAddress: nft.contractAddress,
@@ -149,7 +135,7 @@ function CollectionNFTs({
           className="border rounded-lg p-4 bg-white shadow"
         >
           <Image
-            src={resolveImageUrl(nft.metadata?.image)}
+            src={resolveIPFSUrl(nft.metadata?.image)}
             alt={nft.metadata?.name || "NFT"}
             width={400}
             height={400}

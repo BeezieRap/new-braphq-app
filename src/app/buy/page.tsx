@@ -13,16 +13,8 @@ import {
 import { avalanche } from "thirdweb/chains";
 import { client } from "@/app/client";
 import { MARKETPLACE_ADDRESS } from "@/const/contracts";
-import Image from "next/image"; // <-- Import Image
-
-// Helper function to resolve IPFS and fallback images
-function resolveImageUrl(url?: string) {
-  if (!url) return "/placeholder.png";
-  if (url.startsWith("ipfs://")) {
-    return url.replace("ipfs://", "https://ipfs.io/ipfs/");
-  }
-  return url;
-}
+import Image from "next/image";
+import { resolveIPFSUrl } from "@/utils/ipfs";
 
 export default function BuyPage() {
   const [pendingId, setPendingId] = useState<string | null>(
@@ -48,7 +40,6 @@ export default function BuyPage() {
     contract: marketplace,
   });
 
-  // Buy handler
   const handleBuy = useCallback(
     async (listing: any) => {
       setErrorMsg(null);
@@ -101,7 +92,6 @@ export default function BuyPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {listings && listings.length > 0 ? (
           listings.map((listing: any) => {
-            // Only show buy button if the listing has a price
             const hasPrice =
               listing.currencyValuePerToken &&
               listing.currencyValuePerToken.displayValue &&
@@ -113,7 +103,7 @@ export default function BuyPage() {
                 className="border rounded-lg p-4 bg-white shadow"
               >
                 <Image
-                  src={resolveImageUrl(
+                  src={resolveIPFSUrl(
                     listing.asset?.metadata?.image,
                   )}
                   alt={
