@@ -13,6 +13,7 @@ import {
 import { avalanche } from "thirdweb/chains";
 import { client } from "@/app/client";
 import { MARKETPLACE_ADDRESS } from "@/const/contracts";
+import Image from "next/image"; // <-- Import Image
 
 // Helper function to resolve IPFS and fallback images
 function resolveImageUrl(url?: string) {
@@ -111,13 +112,15 @@ export default function BuyPage() {
                 key={listing.id}
                 className="border rounded-lg p-4 bg-white shadow"
               >
-                <img
+                <Image
                   src={resolveImageUrl(
                     listing.asset?.metadata?.image,
                   )}
                   alt={
                     listing.asset?.metadata?.name || "NFT"
                   }
+                  width={400}
+                  height={400}
                   className="w-full h-64 object-cover rounded"
                 />
                 <h2 className="text-xl font-bold mt-2 text-black">
