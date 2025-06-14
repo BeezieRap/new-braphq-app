@@ -12,13 +12,13 @@ import {
   prepareContractCall,
   readContract,
 } from "thirdweb";
-import { BRAP_TOKEN_ADDRESS } from "@/const/contracts";
 import {
-  getNFT,
   getOwnedNFTs,
+  getNFT,
 } from "thirdweb/extensions/erc721";
 import { avalanche } from "thirdweb/chains";
 import { client } from "@/app/client";
+import { BRAP_TOKEN_ADDRESS } from "@/const/contracts";
 import { resolveIPFSUrl } from "@/utils/ipfs";
 
 const STAKING_PAIRS = [
@@ -47,8 +47,6 @@ const STAKING_PAIRS = [
       "0xB04fcfe7EB075BaC7040f1f647c12A55FA4FbB0f",
   },
 ];
-
-const TOKEN_IDS = [0, 1, 2, 3, 4];
 
 function formatTokenAmount(
   amount: string,
@@ -119,24 +117,15 @@ export default function StakePage() {
           address: pair.stakingAddress,
         });
 
-        // Fetch all NFTs for this collection and filter by owner
         let ownedNFTs: any[] = [];
-        for (const tokenId of TOKEN_IDS) {
-          try {
-            const nft = await getNFT({
+        try {
+          ownedNFTs =
+            (await getOwnedNFTs({
               contract: nftContract,
-              tokenId: BigInt(tokenId),
-            });
-            if (
-              nft.owner &&
-              nft.owner.toLowerCase() ===
-                account.address.toLowerCase()
-            ) {
-              ownedNFTs.push(nft);
-            }
-          } catch {
-            // NFT may not exist, skip
-          }
+              owner: account.address,
+            })) || [];
+        } catch {
+          ownedNFTs = [];
         }
 
         let stakeInfo: any = {
@@ -407,136 +396,106 @@ export default function StakePage() {
                       NFTs from this collection.
                     </div>
                   )}
-                {unstakedNFTs.map((nft: any) => {
-                  const metadata = nft.metadata || {};
-                  const name =
-                    metadata.name || "Untitled NFT";
-                  const description =
-                    metadata.description ||
-                    "No description available.";
-                  const image = metadata.image
-                    ? resolveIPFSUrl(metadata.image)
-                    : "/placeholder.png";
-
-                  return (
-                    <div
-                      key={`unstaked-${nft.contractAddress}-${nft.id.toString()}-${pair.stakingAddress}`}
-                      className="border rounded-lg p-4 bg-white shadow border"
-                    >
-                      <Image
-                        src={image}
-                        alt={name}
-                        width={400}
-                        height={400}
-                        className="w-full h-64 object-cover rounded"
-                        onError={(e) => {
-                          (
-                            e.target as HTMLImageElement
-                          ).src = "/placeholder.png";
-                        }}
-                        unoptimized
-                      />
-                      <h2 className="text-xl font-bold mt-2 text-black">
-                        {name}
-                      </h2>
-                      <p className="text-black">
-                        {description}
-                      </p>
-                      <div className="mt-2 text-black font-semibold">
-                        <span className="inline-block px-2 py-1 bg-gray-200 rounded text-black font-bold">
-                          Not Staked
-                        </span>
-                      </div>
-                      <div className="mt-4 flex flex-col gap-2">
-                        <button
-                          className="w-full py-3 rounded-lg font-bold text-black bg-gradient-to-r from-yellow-300 to-orange-400 hover:from-yellow-400 hover:to-orange-500 transition"
-                          onClick={() =>
-                            handleStake(
-                              pair.stakingAddress,
-                              nft,
-                            )
-                          }
-                          disabled={
-                            actionStatus[
-                              `${pair.stakingAddress}-${nft.id}`
-                            ] === "staking"
-                          }
-                        >
-                          {actionStatus[
+                {unstakedNFTs.map((nft: any) => (
+                  <div
+                    key={`unstaked-${nft.contractAddress}-${nft.id.toString()}-${pair.stakingAddress}`}
+                    className="border rounded-lg p-4 bg-white shadow border"
+                  >
+                    <Image
+                      src={resolveIPFSUrl(
+                        nft.metadata?.image,
+                      )}
+                      alt={nft.metadata?.name || "NFT"}
+                      width={400}
+                      height={400}
+                      className="w-full h-64 object-cover rounded"
+                      unoptimized
+                    />
+                    <h2 className="text-xl font-bold mt-2 text-black">
+                      {nft.metadata?.name || "Untitled NFT"}
+                    </h2>
+                    <p className="text-black">
+                      {nft.metadata?.description || ""}
+                    </p>
+                    <div className="mt-2 text-black font-semibold">
+                      <span className="inline-block px-2 py-1 bg-gray-200 rounded text-black font-bold">
+                        Not Staked
+                      </span>
+                    </div>
+                    <div className="mt-4 flex flex-col gap-2">
+                      <button
+                        className="w-full py-3 rounded-lg font-bold text-black bg-gradient-to-r from-yellow-300 to-orange-400 hover:from-yellow-400 hover:to-orange-500 transition"
+                        onClick={() =>
+                          handleStake(
+                            pair.stakingAddress,
+                            nft,
+                          )
+                        }
+                        disabled={
+                          actionStatus[
                             `${pair.stakingAddress}-${nft.id}`
                           ] === "staking"
-                            ? "Staking..."
-                            : "Stake Bumba Beez"}
-                        </button>
-                      </div>
+                        }
+                      >
+                        {actionStatus[
+                          `${pair.stakingAddress}-${nft.id}`
+                        ] === "staking"
+                          ? "Staking..."
+                          : "Stake Bumba Beez"}
+                      </button>
                     </div>
-                  );
-                })}
-                {stakedNFTs.map((nft: any) => {
-                  const metadata = nft.metadata || {};
-                  const name =
-                    metadata.name || "Untitled NFT";
-                  const description =
-                    metadata.description ||
-                    "No description available.";
-                  const image = metadata.image
-                    ? resolveIPFSUrl(metadata.image)
-                    : "/placeholder.png";
-
-                  return (
-                    <div
-                      key={`staked-${nft.contractAddress}-${nft.id.toString()}-${pair.stakingAddress}`}
-                      className="border rounded-lg p-4 bg-white shadow border-4 border-yellow-400"
-                    >
-                      <Image
-                        src={image}
-                        alt={name}
-                        width={400}
-                        height={400}
-                        className="w-full h-64 object-cover rounded"
-                        onError={(e) => {
-                          (
-                            e.target as HTMLImageElement
-                          ).src = "/placeholder.png";
-                        }}
-                        unoptimized
-                      />
-                      <h2 className="text-xl font-bold mt-2 text-black">
-                        {name}
-                      </h2>
-                      <p className="text-black">
-                        {description}
-                      </p>
-                      <div className="mt-2 text-black font-semibold">
-                        <span className="inline-block px-2 py-1 bg-yellow-200 rounded text-black font-bold">
-                          Staked
-                        </span>
-                      </div>
-                      <div className="mt-4 flex flex-col gap-2">
-                        <button
-                          className="w-full py-3 rounded-lg font-bold text-black bg-gradient-to-r from-yellow-300 to-orange-400 hover:from-yellow-400 hover:to-orange-500 transition"
-                          onClick={() =>
-                            handleUnstake(
-                              pair.stakingAddress,
-                              nft,
-                            )
-                          }
-                          disabled={
-                            actionStatus[
-                              `${pair.stakingAddress}-${nft.id}`
-                            ] === "unstaking"
-                          }
-                        >
-                          {actionStatus[
+                  </div>
+                ))}
+                {stakedNFTs.map((nft: any) => (
+                  <div
+                    key={`staked-${nft.contractAddress}-${nft.id.toString()}-${pair.stakingAddress}`}
+                    className="border rounded-lg p-4 bg-white shadow border-4 border-yellow-400"
+                  >
+                    <Image
+                      src={resolveIPFSUrl(
+                        nft.metadata?.image,
+                      )}
+                      alt={nft.metadata?.name || "NFT"}
+                      width={400}
+                      height={400}
+                      className="w-full h-64 object-cover rounded"
+                      unoptimized
+                    />
+                    <h2 className="text-xl font-bold mt-2 text-black">
+                      {nft.metadata?.name || "Untitled NFT"}
+                    </h2>
+                    <p className="text-black">
+                      {nft.metadata?.description || ""}
+                    </p>
+                    <div className="mt-2 text-black font-semibold">
+                      <span className="inline-block px-2 py-1 bg-yellow-200 rounded text-black font-bold">
+                        Staked
+                      </span>
+                    </div>
+                    <div className="mt-4 flex flex-col gap-2">
+                      <button
+                        className="w-full py-3 rounded-lg font-bold text-black bg-gradient-to-r from-yellow-300 to-orange-400 hover:from-yellow-400 hover:to-orange-500 transition"
+                        onClick={() =>
+                          handleUnstake(
+                            pair.stakingAddress,
+                            nft,
+                          )
+                        }
+                        disabled={
+                          actionStatus[
                             `${pair.stakingAddress}-${nft.id}`
                           ] === "unstaking"
-                            ? "Unstaking..."
-                            : "Unstake Bumba Beez"}
-                        </button>
-                      </div>
+                        }
+                      >
+                        {actionStatus[
+                          `${pair.stakingAddress}-${nft.id}`
+                        ] === "unstaking"
+                          ? "Unstaking..."
+                          : "Unstake Bumba Beez"}
+                      </button>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             </div>
           );
