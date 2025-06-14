@@ -15,6 +15,7 @@ import { client } from "@/app/client";
 import { MARKETPLACE_ADDRESS } from "@/const/contracts";
 import Image from "next/image";
 import { resolveIPFSUrl } from "@/utils/ipfs";
+import NFTDisplay from "@/components/NFTDisplay"; // <-- Add this import
 
 export default function BuyPage() {
   const [pendingId, setPendingId] = useState<string | null>(
@@ -84,6 +85,11 @@ export default function BuyPage() {
       <h1 className="text-3xl font-bold mb-6 text-black">
         Buy Bumba Beez!
       </h1>
+      {/* --- NFT Showcase --- */}
+      <div className="mb-8">
+        <NFTDisplay />
+      </div>
+      {/* --- End NFT Showcase --- */}
       {errorMsg && (
         <div className="mb-4 p-3 bg-red-100 text-red-800 rounded">
           {errorMsg}

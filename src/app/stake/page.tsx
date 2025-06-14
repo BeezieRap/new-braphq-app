@@ -20,6 +20,7 @@ import { avalanche } from "thirdweb/chains";
 import { client } from "@/app/client";
 import { BRAP_TOKEN_ADDRESS } from "@/const/contracts";
 import { resolveIPFSUrl } from "@/utils/ipfs";
+import NFTDisplay from "@/components/NFTDisplay"; // <-- Add this import
 
 const STAKING_PAIRS = [
   {
@@ -318,6 +319,11 @@ export default function StakePage() {
       <h1 className="text-3xl font-bold mb-2 text-black">
         Stake Your NFTs
       </h1>
+      {/* --- NFT Showcase --- */}
+      <div className="mb-8">
+        <NFTDisplay />
+      </div>
+      {/* --- End NFT Showcase --- */}
       <div className="mb-4 text-black font-semibold">
         {brapBalance
           ? `Your BRAP Balance: ${brapBalance.displayValue} ${brapBalance.symbol}`

@@ -17,6 +17,7 @@ import {
 } from "@/const/contracts";
 import Image from "next/image";
 import { resolveIPFSUrl } from "@/utils/ipfs";
+import NFTDisplay from "@/components/NFTDisplay"; // <-- Add this import
 
 const DEXSCREENER_API =
   "https://api.dexscreener.com/latest/dex/pairs/avalanche/0x5b3ff4d494e9ee69ee0f52ab9656cffe99d4839e";
@@ -198,6 +199,11 @@ export default function SellPage() {
       <h1 className="text-3xl font-bold mb-2 text-black">
         Jeet Your Bumba Beez
       </h1>
+      {/* --- NFT Showcase --- */}
+      <div className="mb-8">
+        <NFTDisplay />
+      </div>
+      {/* --- End NFT Showcase --- */}
       <div className="mb-4 text-black font-semibold">
         {brapPrice
           ? `Current Price: 1 BRAPTKN = ${brapPrice} AVAX`
