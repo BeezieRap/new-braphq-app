@@ -1,8 +1,11 @@
-// utils/ipfs.ts
-export function resolveIPFSUrl(url?: string) {
-  if (!url) return "/placeholder.png";
-  if (url.startsWith("ipfs://")) {
-    return url.replace("ipfs://", "https://ipfs.io/ipfs/");
+/**
+ * Converts an IPFS URI (ipfs://...) to an HTTP gateway URL.
+ * If the input is already an HTTP(S) URL, returns it unchanged.
+ */
+export function resolveIPFSUrl(uri: string): string {
+  if (!uri) return "";
+  if (uri.startsWith("ipfs://")) {
+    return uri.replace("ipfs://", "https://ipfs.io/ipfs/");
   }
-  return url;
+  return uri;
 }
