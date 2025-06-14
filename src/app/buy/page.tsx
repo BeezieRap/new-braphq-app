@@ -12,7 +12,11 @@ import {
 } from "thirdweb/extensions/marketplace";
 import { avalanche } from "thirdweb/chains";
 import { client } from "@/app/client";
-import { MARKETPLACE_ADDRESS } from "@/const/contracts";
+import {
+  NFT_COLLECTIONS,
+  MARKETPLACE_ADDRESS,
+  BRAP_TOKEN_ADDRESS,
+} from "@/const/contracts";
 import Image from "next/image";
 import { resolveIPFSUrl } from "@/utils/ipfs";
 import NFTDisplay from "@/components/NFTDisplay"; // <-- Add this import

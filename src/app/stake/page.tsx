@@ -13,12 +13,16 @@ import {
   readContract,
 } from "thirdweb";
 import {
+  NFT_COLLECTIONS,
+  MARKETPLACE_ADDRESS,
+  BRAP_TOKEN_ADDRESS,
+} from "@/const/contracts";
+import {
   getOwnedNFTs,
   getNFT,
 } from "thirdweb/extensions/erc721";
 import { avalanche } from "thirdweb/chains";
 import { client } from "@/app/client";
-import { BRAP_TOKEN_ADDRESS } from "@/const/contracts";
 import { resolveIPFSUrl } from "@/utils/ipfs";
 import NFTDisplay from "@/components/NFTDisplay"; // <-- Add this import
 
